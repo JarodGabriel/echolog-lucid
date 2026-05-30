@@ -10,14 +10,16 @@ This is not an official Granola or Fathom app.
 - Opens meeting details with people, notes, summaries, transcripts, and recording links when available.
 - Searches meeting titles, people, notes, action items, and fetched transcript text.
 - Highlights matching transcript words inside meeting details.
-- Installs on Android through Chrome as a PWA.
+- Installs on Android through any browser that supports PWA installation.
 
 ## Android Install
 
-1. Deploy the app to a HTTPS host such as Vercel.
-2. Open the deployed URL in Chrome on Android.
-3. Tap the Chrome menu.
-4. Tap `Add to Home screen` or `Install app`.
+1. Deploy the app to a HTTPS host.
+2. Open the deployed URL in a PWA-capable Android browser.
+3. Open the browser menu.
+4. Tap `Add to Home screen`, `Install app`, or the browser's equivalent install option.
+
+Chrome is usually the smoothest Android install path, but it is not required. Edge, Brave, Samsung Internet, and other Chromium-based Android browsers may also work if they support installing PWAs.
 
 ## Requirements
 
@@ -58,7 +60,7 @@ Open `http://localhost:3000`.
 
 ## Deploying
 
-Vercel works well for this app:
+Vercel works well for this app and is the easiest recommended setup:
 
 1. Create a Vercel project from this repository.
 2. Add the environment variables from `.env.example`.
@@ -66,6 +68,15 @@ Vercel works well for this app:
 4. Open the app and connect Granola.
 
 Use `NEXT_PUBLIC_APP_URL` for the production URL after the domain is known. This keeps Granola OAuth redirects stable.
+
+Vercel is not required. Any host can work if it supports:
+
+- Next.js server routes.
+- HTTPS.
+- Secure environment variables.
+- Long enough serverless or server request timeouts for meeting fetches.
+
+Users should deploy their own fork or copy of the repository and add their own Granola and Fathom credentials. Their deployment does not use your accounts, keys, logs, or meeting data.
 
 ## Security Notes
 
