@@ -2,6 +2,8 @@ import type { ConnectorStatus, MeetingNote } from "@/lib/types";
 import type { GranolaTokens } from "@/lib/granola-oauth";
 
 const GRANOLA_MCP_URL = "https://mcp.granola.ai/mcp";
+const GRANOLA_APP_URL = "https://app.granola.ai";
+const GRANOLA_NOTES_URL = "https://notes.granola.ai";
 const MCP_PROTOCOL_VERSION = "2025-06-18";
 const GRANOLA_MEETING_ID_LIMIT = 10;
 const MCP_REQUEST_TIMEOUT_MS = 24000;
@@ -14,6 +16,20 @@ type JsonRpcResponse = {
     message?: string;
   };
 };
+
+export function resolveGranolaSourceUrl(rawId?: string, explicitUrl?: string) {
+  const explicitGranolaUrl = normalizeGranolaUrl(explicitUrl);
+  if (explicitGranolaUrl) {
+    return explicitGranolaUrl;
+  }
+
+  const id = rawId?.replace(/^granola-/, "");
+  if (id && isUuid(id)) {
+    return `${GRANOLA_NOTES_URL}/d/${encodeURIComponent(id)}`;
+  }
+
+  return GRANOLA_APP_URL;
+}
 
 export async function fetchGranolaMeetings(tokens: GranolaTokens | null): Promise<{
   status: ConnectorStatus;
@@ -77,7 +93,7 @@ export async function fetchGranolaMeetingDetail(
     attendees: meeting.attendees,
     actionItems: [],
     transcriptPreview: [],
-    sourceUrl: "https://app.granola.ai"
+    sourceUrl: resolveGranolaSourceUrl(meeting.id)
   };
 
   if (!tokens) {
@@ -303,7 +319,7 @@ function mergeGranolaContent(current: MeetingNote, incoming: MeetingNote): Meeti
     actionItems: incoming.actionItems.length ? incoming.actionItems : current.actionItems,
     transcript: incoming.transcript || current.transcript,
     transcriptPreview: incoming.transcriptPreview.length ? incoming.transcriptPreview : current.transcriptPreview,
-    sourceUrl: current.sourceUrl || incoming.sourceUrl
+    sourceUrl: preferredGranolaSourceUrl(incoming.sourceUrl, current.sourceUrl)
   };
 
   return hasGranolaContent(merged)
@@ -602,7 +618,7 @@ function normalizeGranolaMeetings(result: unknown): MeetingNote[] {
       summary: text,
       actionItems: extractActionItems(text),
       transcriptPreview: [],
-      sourceUrl: "https://app.granola.ai"
+      sourceUrl: GRANOLA_APP_URL
     }
   ];
 }
@@ -653,6 +669,17 @@ function normalizeGranolaObject(item: Record<string, unknown>, index: number): M
   );
   const id = stringFrom(item.id) || stringFrom(item.meeting_id) || `granola-${index}-${title}`;
   const attendees = arrayOfStrings(item.attendees || item.participants || item.invitees);
+  const explicitSourceUrl = directStringFromObject(item, [
+    "web_url",
+    "webUrl",
+    "note_url",
+    "noteUrl",
+    "source_url",
+    "sourceUrl",
+    "share_url",
+    "shareUrl",
+    "url"
+  ]);
 
   return {
     id: `granola-${id}`,
@@ -665,7 +692,7 @@ function normalizeGranolaObject(item: Record<string, unknown>, index: number): M
     actionItems: arrayOfStrings(item.action_items || item.actions || item.todos || item.next_steps).concat(extractActionItems(summary || "")),
     transcript,
     transcriptPreview: transcript ? transcriptToPreview(transcript) : [],
-    sourceUrl: "https://app.granola.ai"
+    sourceUrl: resolveGranolaSourceUrl(id, explicitSourceUrl)
   };
 }
 
@@ -685,6 +712,17 @@ function parseGranolaXmlishMeetings(text: string): MeetingNote[] {
     const id = attrs.id || attrs.meeting_id || `granola-${index}`;
     const title = attrs.title || attrs.name || "Granola meeting";
     const occurredAt = attrs.date || attrs.meeting_date || attrs.created_at || attrs.start_time;
+    const explicitSourceUrl =
+      attrs.web_url ||
+      attrs["web-url"] ||
+      attrs.note_url ||
+      attrs["note-url"] ||
+      attrs.source_url ||
+      attrs["source-url"] ||
+      attrs.share_url ||
+      attrs["share-url"] ||
+      attrs.url ||
+      attrs.href;
     const participants = extractXmlishSection(body, "known_participants") || extractXmlishSection(body, "participants");
     const privateNotes = extractFirstXmlishSection(body, ["private_notes", "private-notes", "personal_notes", "user_notes"]);
     const enhancedNotes = extractFirstXmlishSection(body, [
@@ -717,7 +755,7 @@ function parseGranolaXmlishMeetings(text: string): MeetingNote[] {
       actionItems,
       transcript,
       transcriptPreview: transcript ? transcriptToPreview(transcript) : [],
-      sourceUrl: "https://app.granola.ai"
+      sourceUrl: resolveGranolaSourceUrl(id, explicitSourceUrl)
     });
     index += 1;
   }
@@ -806,6 +844,42 @@ function cleanXmlishText(value?: string) {
 
 function isString(value: unknown): value is string {
   return typeof value === "string" && value.length > 0;
+}
+
+function preferredGranolaSourceUrl(primary?: string, fallback?: string) {
+  const normalizedPrimary = normalizeGranolaUrl(primary);
+  const normalizedFallback = normalizeGranolaUrl(fallback);
+
+  if (normalizedPrimary && normalizedPrimary !== GRANOLA_APP_URL) {
+    return normalizedPrimary;
+  }
+
+  if (normalizedFallback && normalizedFallback !== GRANOLA_APP_URL) {
+    return normalizedFallback;
+  }
+
+  return normalizedPrimary || normalizedFallback || GRANOLA_APP_URL;
+}
+
+function normalizeGranolaUrl(value?: string) {
+  if (!value) {
+    return undefined;
+  }
+
+  try {
+    const url = new URL(value);
+    if (url.protocol === "https:" && url.hostname.endsWith("granola.ai")) {
+      return url.toString();
+    }
+  } catch {
+    return undefined;
+  }
+
+  return undefined;
+}
+
+function isUuid(value: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
 function findMeetingObjects(value: unknown): Array<Record<string, unknown>> {

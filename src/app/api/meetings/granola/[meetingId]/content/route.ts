@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { authenticated } from "@/lib/auth";
-import { fetchGranolaMeetingDetail } from "@/lib/granola-mcp";
+import { fetchGranolaMeetingDetail, resolveGranolaSourceUrl } from "@/lib/granola-mcp";
 import { GRANOLA_TOKEN_COOKIE, granolaCookieOptions, readGranolaTokens, refreshGranolaTokens, sealGranolaValue } from "@/lib/granola-oauth";
 import type { MeetingNote } from "@/lib/types";
 
@@ -60,7 +60,7 @@ function granolaTimeoutMeeting(meeting: Pick<MeetingNote, "id" | "title" | "occu
     source: "granola",
     actionItems: [],
     transcriptPreview: [],
-    sourceUrl: "https://app.granola.ai",
+    sourceUrl: resolveGranolaSourceUrl(meeting.id),
     contentStatus: "Granola is taking too long to return this note. Tap Retry Granola, or open the source note."
   };
 }
@@ -71,7 +71,7 @@ function granolaErrorMeeting(meeting: Pick<MeetingNote, "id" | "title" | "occurr
     source: "granola",
     actionItems: [],
     transcriptPreview: [],
-    sourceUrl: "https://app.granola.ai",
+    sourceUrl: resolveGranolaSourceUrl(meeting.id),
     contentStatus: error instanceof Error ? error.message : "Granola did not return this note."
   };
 }

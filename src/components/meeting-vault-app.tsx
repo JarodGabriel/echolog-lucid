@@ -1052,8 +1052,8 @@ function MeetingDetail({
               <Play size={19} aria-hidden />
             </span>
             <span>
-              <strong>Open recording</strong>
-              <small>{meeting.source === "fathom" ? "Watch in Fathom" : "Open source note"}</small>
+              <strong>{meeting.source === "fathom" ? "Open recording" : "Open in Granola"}</strong>
+              <small>{meeting.source === "fathom" ? "Watch in Fathom" : "View source note"}</small>
             </span>
             <ArrowUpRight size={18} aria-hidden />
           </a>
