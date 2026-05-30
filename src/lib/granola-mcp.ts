@@ -2,7 +2,6 @@ import type { ConnectorStatus, MeetingNote } from "@/lib/types";
 import type { GranolaTokens } from "@/lib/granola-oauth";
 
 const GRANOLA_MCP_URL = "https://mcp.granola.ai/mcp";
-const GRANOLA_APP_URL = "https://app.granola.ai";
 const GRANOLA_NOTES_URL = "https://notes.granola.ai";
 const MCP_PROTOCOL_VERSION = "2025-06-18";
 const GRANOLA_MEETING_ID_LIMIT = 10;
@@ -28,7 +27,7 @@ export function resolveGranolaSourceUrl(rawId?: string, explicitUrl?: string) {
     return `${GRANOLA_NOTES_URL}/d/${encodeURIComponent(id)}`;
   }
 
-  return GRANOLA_APP_URL;
+  return undefined;
 }
 
 export async function fetchGranolaMeetings(tokens: GranolaTokens | null): Promise<{
@@ -617,8 +616,7 @@ function normalizeGranolaMeetings(result: unknown): MeetingNote[] {
       attendees: [],
       summary: text,
       actionItems: extractActionItems(text),
-      transcriptPreview: [],
-      sourceUrl: GRANOLA_APP_URL
+      transcriptPreview: []
     }
   ];
 }
@@ -850,15 +848,11 @@ function preferredGranolaSourceUrl(primary?: string, fallback?: string) {
   const normalizedPrimary = normalizeGranolaUrl(primary);
   const normalizedFallback = normalizeGranolaUrl(fallback);
 
-  if (normalizedPrimary && normalizedPrimary !== GRANOLA_APP_URL) {
+  if (normalizedPrimary) {
     return normalizedPrimary;
   }
 
-  if (normalizedFallback && normalizedFallback !== GRANOLA_APP_URL) {
-    return normalizedFallback;
-  }
-
-  return normalizedPrimary || normalizedFallback || GRANOLA_APP_URL;
+  return normalizedFallback;
 }
 
 function normalizeGranolaUrl(value?: string) {
@@ -868,7 +862,7 @@ function normalizeGranolaUrl(value?: string) {
 
   try {
     const url = new URL(value);
-    if (url.protocol === "https:" && url.hostname.endsWith("granola.ai")) {
+    if (url.protocol === "https:" && url.hostname.endsWith("granola.ai") && url.hostname !== "app.granola.ai") {
       return url.toString();
     }
   } catch {

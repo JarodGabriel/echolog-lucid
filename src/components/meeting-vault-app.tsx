@@ -1020,7 +1020,7 @@ function MeetingDetail({
 
   const hasNotes = Boolean(meeting.summary || meeting.notes);
   const splitSummary = meeting.source === "fathom";
-  const recordingUrl = meeting.videoUrl || meeting.sourceUrl;
+  const recordingUrl = getMeetingExternalUrl(meeting);
   const granolaPendingWithoutContent =
     meeting.source === "granola" && !meetingHasReadableContent(meeting) && Boolean(granolaContentLoading || granolaContentError);
 
@@ -1647,6 +1647,18 @@ function mergeMeeting(current: MeetingNote, incoming: MeetingNote): MeetingNote 
     videoUrl: incoming.videoUrl || current.videoUrl,
     sourceUrl: incoming.sourceUrl || current.sourceUrl
   };
+}
+
+function getMeetingExternalUrl(meeting: MeetingNote) {
+  if (meeting.source === "fathom") {
+    return meeting.videoUrl || meeting.sourceUrl;
+  }
+
+  if (!meeting.sourceUrl || meeting.sourceUrl.includes("app.granola.ai")) {
+    return undefined;
+  }
+
+  return meeting.sourceUrl;
 }
 
 function syncStatusFromPayload(payload: MeetingsPayload): SyncStatus {
