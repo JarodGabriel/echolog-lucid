@@ -1,4 +1,4 @@
-const CACHE_NAME = "echolog-lucid-shell-v14";
+const CACHE_NAME = "echolog-lucid-shell-v15";
 const SHELL_ASSETS = ["/", "/manifest.webmanifest", "/icon.svg"];
 
 self.addEventListener("install", (event) => {
