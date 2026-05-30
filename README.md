@@ -30,6 +30,8 @@ Chrome is usually the smoothest Android install path, but it is not required. Ed
 
 ## Local Setup
 
+Local setup is the same no matter where you plan to deploy later. This is a Next.js app, so you can develop and test it locally before hosting it on Vercel, another managed host, or your own server.
+
 Install exact locked dependencies:
 
 ```bash
@@ -58,7 +60,7 @@ npm run dev
 
 Open `http://localhost:3000`.
 
-## Deploying
+## Deploying to Vercel or Another Host
 
 Vercel works well for this app and is the easiest recommended setup:
 
@@ -75,6 +77,8 @@ Vercel is not required. Any host can work if it supports:
 - HTTPS.
 - Secure environment variables.
 - Long enough serverless or server request timeouts for meeting fetches.
+
+Tools such as Lovable, Bolt, Replit-style workspaces, or other app builders can use this repository as long as they can run the real Next.js server app and preserve environment variables securely. A static-only host will not work because the Granola and Fathom integrations require server-side API routes.
 
 Users should deploy their own fork or copy of the repository and add their own Granola and Fathom credentials. Their deployment does not use your accounts, keys, logs, or meeting data.
 
