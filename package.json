@@ -1,0 +1,32 @@
+{
+  "name": "echolog-lucid-pwa",
+  "version": "0.1.0",
+  "description": "Phone-first PWA for recent Granola and Fathom meeting notes.",
+  "private": true,
+  "license": "MIT",
+  "packageManager": "npm@11.11.0",
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "lucide-react": "1.17.0",
+    "next": "16.2.6",
+    "react": "19.2.6",
+    "react-dom": "19.2.6"
+  },
+  "overrides": {
+    "postcss": "8.5.10"
+  },
+  "devDependencies": {
+    "@types/node": "25.9.1",
+    "@types/react": "19.2.15",
+    "@types/react-dom": "19.2.3",
+    "typescript": "6.0.3"
+  }
+}

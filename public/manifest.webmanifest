@@ -1,0 +1,18 @@
+{
+  "name": "Echolog Lucid",
+  "short_name": "Echolog",
+  "description": "Phone access to recent Granola and Fathom meeting notes.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f6f3ed",
+  "theme_color": "#155e63",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
