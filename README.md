@@ -100,6 +100,8 @@ ENABLE_FATHOM="false"
 
 Disabled connectors are hidden from the app UI and skipped by server routes. This is useful if someone forks or copies the repo and only wants Fathom, or if they already use Granola's first-party iOS app but still want a self-hosted Fathom notes PWA.
 
+If `ENABLE_GRANOLA` or `ENABLE_FATHOM` is missing, Echolog Lucid treats that connector as enabled. After changing these values on Vercel or another host, redeploy the app before expecting the UI to change. Installed PWAs can also hold onto a cached version, so close and reopen the installed app, or refresh the deployed URL in the browser, after the redeploy finishes.
+
 ## Deploying to Vercel or Another Host
 
 Vercel works well for this app and is the easiest recommended setup:
