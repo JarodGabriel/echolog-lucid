@@ -1,26 +1,26 @@
 # Echolog Lucid
 
-Echolog Lucid is a phone-first Android-friendly PWA for recent meeting notes from Granola and Fathom. It is meant to be self-hosted so each person controls their own keys, meeting data, and deployment.
+Echolog Lucid is a phone-first Android-friendly PWA for recent meeting notes from Granola ai and Fathom ai notetaker. It is meant to be self-hosted so each person controls their own keys, meeting data, and deployment.
 
-This is not an official Granola or Fathom app.
+This is not an official Granola or Fathom app. This is just a project that was made because of a probelm I was having for awhile. 
 
-Users should deploy their own fork or copy of the repository and add their own Granola and Fathom credentials. Their deployment does not use your accounts, keys, logs, or meeting data.
+Users should deploy their own fork or copy of the repository and add their own Granola and Fathom credentials. Other users deployments do not use your accounts, keys, logs, or meeting data.
 
 ## Why This Exists
 
-Granola and Fathom have strong desktop and iOS experiences, but Android users can still end up stuck going back to a laptop just to review notes from an earlier meeting.
+Granola and Fathom have strong desktop experiences, but that gap is missing for Android users like myself who still end up stuck going back to a laptop just to review notes from an earlier meeting.
 
-Echolog Lucid is a practical bridge for that gap. If you already use Granola or Fathom for meetings, this app gives you a pocket-friendly way to pull up synced notes, summaries, transcripts, people, and recording links after you leave your desk.
+Echolog Lucid is a practical bridge I built for this gap. If you already use Granola or Fathom for meetings, this app gives you a pocket-friendly way to pull up synced notes, summaries, transcripts, people, and recording links after you leave your desk.
 
-The goal is simple: finish work, walk away from the laptop, and still know your meeting memory is available on your phone.
+The goal is simple: finish work, walk away from the laptop, and still know your meeting memory is available on your phone for easy and quick access.
 
 ## What This Is Not
 
-This is not trying to match everything the first-party iOS apps can do.
+Echolog Lucid is not trying to match everything that Granola or Fathom may potentially do with their own apps.
 
-Echolog Lucid does not replace Granola's or Fathom's native mobile features such as on-the-go recording, voice memos, outbound calling, audio editing, trimming, sharing controls, language selection, or full first-party sync behavior. It depends on your own Granola and Fathom accounts and shows the meeting data those services make available.
+Echolog Lucid only works with your own Granola and Fathom accounts and shows the meeting data those services make available to you.
 
-Think of it as a lightweight Android review layer for notes and recordings you already have, not a full clone of either product.
+Think of it as a lightweight review layer for notes and recordings you already have, not a full clone of either product.
 
 ## What It Does
 
@@ -28,16 +28,16 @@ Think of it as a lightweight Android review layer for notes and recordings you a
 - Opens meeting details with people, notes, summaries, transcripts, and recording links when available.
 - Searches meeting titles, people, notes, action items, and fetched transcript text.
 - Highlights matching transcript words inside meeting details.
-- Installs on Android through any browser that supports PWA installation.
+- Installs on Android or IOS devices through any browser that supports PWA installation.
 
-## Android Install
+## Install
 
 1. Deploy the app to a HTTPS host.
 2. Open the deployed URL in a PWA-capable Android browser.
 3. Open the browser menu.
 4. Tap `Add to Home screen`, `Install app`, or the browser's equivalent install option.
 
-Chrome is usually the smoothest Android install path, but it is not required. Edge, Brave, Samsung Internet, and other Chromium-based Android browsers may also work if they support installing PWAs.
+Chrome is usually the smoothest for an install path, but it is not required. Edge, Brave, Samsung Internet, and other Chromium-based browsers may also work if they support installing PWAs.
 
 ## Requirements
 
