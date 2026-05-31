@@ -1,8 +1,26 @@
 # Echolog Lucid
 
-Echolog Lucid is a phone-first PWA for recent meeting notes from Granola and Fathom. It is meant to be self-hosted so each person controls their own keys, meeting data, and deployment.
+Echolog Lucid is a phone-first Android-friendly PWA for recent meeting notes from Granola and Fathom. It is meant to be self-hosted so each person controls their own keys, meeting data, and deployment.
 
 This is not an official Granola or Fathom app.
+
+Users should deploy their own fork or copy of the repository and add their own Granola and Fathom credentials. Their deployment does not use your accounts, keys, logs, or meeting data.
+
+## Why This Exists
+
+Granola and Fathom have strong desktop and iOS experiences, but Android users can still end up stuck going back to a laptop just to review notes from an earlier meeting.
+
+Echolog Lucid is a practical bridge for that gap. If you already use Granola or Fathom for meetings, this app gives you a pocket-friendly way to pull up synced notes, summaries, transcripts, people, and recording links after you leave your desk.
+
+The goal is simple: finish work, walk away from the laptop, and still know your meeting memory is available on your phone.
+
+## What This Is Not
+
+This is not trying to match everything the first-party iOS apps can do.
+
+Echolog Lucid does not replace Granola's or Fathom's native mobile features such as on-the-go recording, voice memos, outbound calling, audio editing, trimming, sharing controls, language selection, or full first-party sync behavior. It depends on your own Granola and Fathom accounts and shows the meeting data those services make available.
+
+Think of it as a lightweight Android review layer for notes and recordings you already have, not a full clone of either product.
 
 ## What It Does
 
@@ -79,8 +97,6 @@ Vercel is not required. Any host can work if it supports:
 - Long enough serverless or server request timeouts for meeting fetches.
 
 Tools such as Lovable, Bolt, Replit-style workspaces, or other app builders can use this repository as long as they can run the real Next.js server app and preserve environment variables securely. A static-only host will not work because the Granola and Fathom integrations require server-side API routes.
-
-Users should deploy their own fork or copy of the repository and add their own Granola and Fathom credentials. Their deployment does not use your accounts, keys, logs, or meeting data.
 
 ## Security Notes
 
