@@ -1,4 +1,5 @@
 import type { ConnectorStatus, MeetingNote } from "@/lib/types";
+import { connectorEnabled, connectorLabel, disabledConnectorStatus } from "@/lib/connectors";
 
 const FATHOM_API_URL = "https://api.fathom.ai/external/v1/meetings";
 const FATHOM_RECORDINGS_API_URL = "https://api.fathom.ai/external/v1/recordings";
@@ -65,9 +66,17 @@ export async function fetchFathomMeetings({
   status: ConnectorStatus;
   meetings: MeetingNote[];
 }> {
+  if (!connectorEnabled("fathom")) {
+    return {
+      status: disabledConnectorStatus("fathom"),
+      meetings: []
+    };
+  }
+
   const apiKey = normalizeFathomApiKey(process.env.FATHOM_API_KEY);
   const status: ConnectorStatus = {
-    label: "Fathom work account",
+    enabled: true,
+    label: connectorLabel("fathom"),
     configured: Boolean(apiKey),
     connected: false
   };
@@ -134,6 +143,10 @@ export async function fetchFathomMeetings({
 }
 
 export async function fetchFathomTranscript(recordingId: string): Promise<string> {
+  if (!connectorEnabled("fathom")) {
+    throw new Error("Fathom is disabled for this deployment.");
+  }
+
   const apiKey = normalizeFathomApiKey(process.env.FATHOM_API_KEY);
   if (!apiKey) {
     throw new Error("Add FATHOM_API_KEY from your work Fathom account.");

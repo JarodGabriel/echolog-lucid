@@ -5,11 +5,13 @@ const staticPayload: MeetingsPayload = {
   generatedAt: "2026-05-30T19:15:00.000Z",
   connectors: {
     granola: {
+      enabled: true,
       configured: true,
       connected: true,
       label: "Granola personal account"
     },
     fathom: {
+      enabled: true,
       configured: true,
       connected: true,
       label: "Fathom work account"

@@ -1,6 +1,7 @@
 export type MeetingSource = "fathom" | "granola";
 
 export type ConnectorStatus = {
+  enabled: boolean;
   configured: boolean;
   connected: boolean;
   label: string;

@@ -213,8 +213,15 @@ export function MeetingVaultApp({ staticPayload, staticMode = false }: MeetingVa
   }, [filtered.length, screen]);
 
   useEffect(() => {
+    if (source !== "all" && payload && !connectorIsEnabled(payload.connectors[source])) {
+      setSource("all");
+    }
+  }, [payload, source]);
+
+  useEffect(() => {
     const trimmed = query.trim();
-    if (staticMode || !auth?.authenticated || source === "granola" || trimmed.length < 4) {
+    const fathomSearchDisabled = payload?.connectors.fathom.enabled === false;
+    if (staticMode || !auth?.authenticated || fathomSearchDisabled || source === "granola" || trimmed.length < 4) {
       setDeepSearch({
         query: trimmed,
         loading: false,
@@ -293,7 +300,7 @@ export function MeetingVaultApp({ staticPayload, staticMode = false }: MeetingVa
       window.clearTimeout(handle);
       controller.abort();
     };
-  }, [auth?.authenticated, staticMode, query, source]);
+  }, [auth?.authenticated, staticMode, payload?.connectors.fathom.enabled, query, source]);
 
   useEffect(() => {
     if (staticMode || screen !== "detail" || !selected || selected.source !== "fathom" || selected.transcript || !selected.recordingId) {
@@ -668,7 +675,7 @@ export function MeetingVaultApp({ staticPayload, staticMode = false }: MeetingVa
               <ShieldCheck size={28} aria-hidden />
             </div>
             <h1>{APP_NAME}</h1>
-            <p>Recent meeting notes from your personal Granola and work Fathom accounts.</p>
+            <p>Recent meeting notes from your connected accounts.</p>
             <form onSubmit={login} className="login-form">
               <label htmlFor="password">Password</label>
               <div className="password-field">
@@ -690,9 +697,9 @@ export function MeetingVaultApp({ staticPayload, staticMode = false }: MeetingVa
             {message && <p className="form-error">{message}</p>}
           </div>
           <div className="source-strip" aria-hidden>
-            <span className="source-word granola">● Granola</span>
+            <span className="source-word granola">● Self-hosted</span>
             <span>·</span>
-            <span className="source-word fathom">● Fathom</span>
+            <span className="source-word fathom">● Private PWA</span>
           </div>
         </section>
       </main>
@@ -802,6 +809,9 @@ function HomeScreen({
   toggleTheme: () => void;
 }) {
   const totalSynced = connectorCounts.granola + connectorCounts.fathom;
+  const granolaEnabled = connectorIsEnabled(payload?.connectors.granola);
+  const fathomEnabled = connectorIsEnabled(payload?.connectors.fathom);
+  const enabledSourceCount = [granolaEnabled, fathomEnabled].filter(Boolean).length;
 
   return (
     <section className="screen home-screen" aria-label="Meeting feed">
@@ -864,21 +874,27 @@ function HomeScreen({
           <span>meetings synced</span>
         </span>
         <span className="week-breakdown">
-          <span>
-            <i className="source-dot granola" />
-            <b>{connectorCounts.granola}</b> Granola
-          </span>
-          <span>
-            <i className="source-dot fathom" />
-            <b>{connectorCounts.fathom}</b> Fathom
-          </span>
+          {granolaEnabled && (
+            <span>
+              <i className="source-dot granola" />
+              <b>{connectorCounts.granola}</b> Granola
+            </span>
+          )}
+          {fathomEnabled && (
+            <span>
+              <i className="source-dot fathom" />
+              <b>{connectorCounts.fathom}</b> Fathom
+            </span>
+          )}
         </span>
       </button>
 
-      <section className="connector-strip" aria-label="Connections">
-        <ConnectorCard status={payload?.connectors.granola} source="granola" onClick={openAccounts} />
-        <ConnectorCard status={payload?.connectors.fathom} source="fathom" onClick={openAccounts} />
-      </section>
+      {(granolaEnabled || fathomEnabled) && (
+        <section className="connector-strip" aria-label="Connections">
+          {granolaEnabled && <ConnectorCard status={payload?.connectors.granola} source="granola" onClick={openAccounts} />}
+          {fathomEnabled && <ConnectorCard status={payload?.connectors.fathom} source="fathom" onClick={openAccounts} />}
+        </section>
+      )}
 
       <div className="search-box">
         <Search size={18} aria-hidden />
@@ -895,21 +911,27 @@ function HomeScreen({
       )}
       {!deepSearch.loading && deepSearch.error && <p className="search-status error">{deepSearch.error}</p>}
 
-      <div className="segment" aria-label="Source filter">
-        <button className={source === "all" ? "active" : ""} onClick={() => setSource("all")} type="button">
-          All
-        </button>
-        <button className={source === "granola" ? "active" : ""} onClick={() => setSource("granola")} type="button">
-          Granola
-        </button>
-        <button className={source === "fathom" ? "active" : ""} onClick={() => setSource("fathom")} type="button">
-          Fathom
-        </button>
-      </div>
+      {enabledSourceCount > 1 && (
+        <div className="segment" aria-label="Source filter">
+          <button className={source === "all" ? "active" : ""} onClick={() => setSource("all")} type="button">
+            All
+          </button>
+          {granolaEnabled && (
+            <button className={source === "granola" ? "active" : ""} onClick={() => setSource("granola")} type="button">
+              Granola
+            </button>
+          )}
+          {fathomEnabled && (
+            <button className={source === "fathom" ? "active" : ""} onClick={() => setSource("fathom")} type="button">
+              Fathom
+            </button>
+          )}
+        </div>
+      )}
 
       <div className="meeting-list">
         {loading && !payload && <LoadingRows />}
-        {!loading && filtered.length === 0 && (deepSearch.loading ? <SearchLoadingState /> : <EmptyState />)}
+        {!loading && filtered.length === 0 && (deepSearch.loading ? <SearchLoadingState /> : <EmptyState connectors={payload?.connectors} />)}
         {filtered.map((meeting) => (
           <MeetingListItem
             key={meeting.id}
@@ -1226,6 +1248,8 @@ function AccountsScreen({
   onBack: () => void;
   updateAppearance: (next: Partial<Appearance>) => void;
 }) {
+  const granolaEnabled = connectorIsEnabled(connectors?.granola);
+  const fathomEnabled = connectorIsEnabled(connectors?.fathom);
   const granolaConnected = Boolean(connectors?.granola.connected);
   const fathomConnected = Boolean(connectors?.fathom.connected);
 
@@ -1240,36 +1264,40 @@ function AccountsScreen({
         </div>
       </header>
 
-      <div className={`account-card ${granolaConnected ? "connected" : "needs-work"}`}>
-        <div className="account-row">
-          <span className="account-icon">{granolaConnected ? <Check size={20} /> : <CircleAlert size={20} />}</span>
-          <span>
-            <strong>Granola personal</strong>
-            <small>{granolaConnected ? connectors?.granola.email || "granola · personal" : "Not connected"}</small>
-          </span>
+      {granolaEnabled && (
+        <div className={`account-card ${granolaConnected ? "connected" : "needs-work"}`}>
+          <div className="account-row">
+            <span className="account-icon">{granolaConnected ? <Check size={20} /> : <CircleAlert size={20} />}</span>
+            <span>
+              <strong>Granola personal</strong>
+              <small>{granolaConnected ? connectors?.granola.email || "granola · personal" : "Not connected"}</small>
+            </span>
+          </div>
+          {granolaConnected ? (
+            <button className="secondary-action" onClick={() => void disconnectGranola()} type="button">
+              <Unplug size={16} aria-hidden />
+              Disconnect Granola
+            </button>
+          ) : (
+            <a className="primary-action" href="/api/granola/connect">
+              <ShieldCheck size={16} aria-hidden />
+              Connect Granola personal
+            </a>
+          )}
         </div>
-        {granolaConnected ? (
-          <button className="secondary-action" onClick={() => void disconnectGranola()} type="button">
-            <Unplug size={16} aria-hidden />
-            Disconnect Granola
-          </button>
-        ) : (
-          <a className="primary-action" href="/api/granola/connect">
-            <ShieldCheck size={16} aria-hidden />
-            Connect Granola personal
-          </a>
-        )}
-      </div>
+      )}
 
-      <div className={`account-card ${fathomConnected ? "connected" : "needs-work"}`}>
-        <div className="account-row">
-          <span className="account-icon">{fathomConnected ? <Check size={20} /> : <CircleAlert size={20} />}</span>
-          <span>
-            <strong>Fathom work</strong>
-            <small>{connectors?.fathom.error || connectors?.fathom.email || (fathomConnected ? "Connected" : "Add FATHOM_API_KEY")}</small>
-          </span>
+      {fathomEnabled && (
+        <div className={`account-card ${fathomConnected ? "connected" : "needs-work"}`}>
+          <div className="account-row">
+            <span className="account-icon">{fathomConnected ? <Check size={20} /> : <CircleAlert size={20} />}</span>
+            <span>
+              <strong>Fathom work</strong>
+              <small>{connectors?.fathom.error || connectors?.fathom.email || (fathomConnected ? "Connected" : "Add FATHOM_API_KEY")}</small>
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
       <section className="appearance-card" aria-label="Appearance">
         <div className="appearance-heading">
@@ -1334,9 +1362,13 @@ function AccountsScreen({
       </section>
 
       <div className="account-empty-panel">
-        <span>{granolaConnected ? <CheckCircle2 size={25} aria-hidden /> : <Plug size={25} aria-hidden />}</span>
-        <strong>{granolaConnected ? "All set — notes are syncing" : "Connect Granola to fill this in"}</strong>
-        <p>{granolaConnected ? "Personal notes now appear alongside Fathom in your feed." : "Your personal notes will appear here alongside Fathom once linked."}</p>
+        <span>{granolaConnected || fathomConnected ? <CheckCircle2 size={25} aria-hidden /> : <Plug size={25} aria-hidden />}</span>
+        <strong>{granolaConnected || fathomConnected ? "All set — enabled notes are syncing" : "Connect an enabled source to fill this in"}</strong>
+        <p>
+          {granolaEnabled || fathomEnabled
+            ? "Only enabled connectors appear in this deployment. Use ENABLE_GRANOLA and ENABLE_FATHOM to change the setup."
+            : "No connectors are enabled for this deployment. Set ENABLE_GRANOLA or ENABLE_FATHOM to true."}
+        </p>
       </div>
     </section>
   );
@@ -1538,12 +1570,24 @@ function renderHighlightedTranscriptText(text: string, query: string) {
   );
 }
 
-function EmptyState() {
+function EmptyState({ connectors }: { connectors?: MeetingsPayload["connectors"] }) {
+  const granolaEnabled = connectorIsEnabled(connectors?.granola);
+  const fathomEnabled = connectorIsEnabled(connectors?.fathom);
+  const enabledCount = [granolaEnabled, fathomEnabled].filter(Boolean).length;
+  const description =
+    enabledCount === 0
+      ? "Enable Granola or Fathom for this deployment, then refresh."
+      : granolaEnabled && fathomEnabled
+        ? "Connect Granola, add your Fathom API key, refresh, or loosen the current search/filter."
+        : granolaEnabled
+          ? "Connect Granola, refresh, or loosen the current search/filter."
+          : "Add your Fathom API key, refresh, or loosen the current search/filter.";
+
   return (
     <div className="empty-state">
       <FileText size={28} aria-hidden />
       <h2>No meetings found</h2>
-      <p>Connect Granola, add your Fathom API key, or loosen the current search/filter.</p>
+      <p>{description}</p>
     </div>
   );
 }
@@ -1662,27 +1706,46 @@ function getMeetingExternalUrl(meeting: MeetingNote) {
 }
 
 function syncStatusFromPayload(payload: MeetingsPayload): SyncStatus {
-  const granolaError = payload.connectors.granola.error;
-  const fathomError = payload.connectors.fathom.error;
-  const granolaCount = payload.meetings.filter((meeting) => meeting.source === "granola").length;
-  const fathomCount = payload.meetings.filter((meeting) => meeting.source === "fathom").length;
+  const enabledSources = (["granola", "fathom"] as MeetingSource[]).filter((source) => connectorIsEnabled(payload.connectors[source]));
   const timestamp = formatRefreshTime(new Date());
 
-  if (granolaError || fathomError) {
+  if (enabledSources.length === 0) {
     return {
       tone: "warning",
-      text: [
-        `Refreshed ${timestamp}.`,
-        `Granola: ${granolaError || `${granolaCount} meetings`}.`,
-        `Fathom: ${fathomError || `${fathomCount} meetings`}.`
-      ].join(" ")
+      text: `Refreshed ${timestamp}. No connectors are enabled for this deployment.`
+    };
+  }
+
+  const parts = enabledSources.map((source) => {
+    const error = payload.connectors[source].error;
+    if (error) {
+      return `${sourceDisplayName(source)}: ${error}.`;
+    }
+
+    const count = payload.meetings.filter((meeting) => meeting.source === source).length;
+    return `${sourceDisplayName(source)}: ${count} meetings.`;
+  });
+  const hasError = enabledSources.some((source) => Boolean(payload.connectors[source].error));
+
+  if (hasError) {
+    return {
+      tone: "warning",
+      text: [`Refreshed ${timestamp}.`, ...parts].join(" ")
     };
   }
 
   return {
     tone: "success",
-    text: `Refreshed ${timestamp}. Granola: ${granolaCount} meetings. Fathom: ${fathomCount} meetings.`
+    text: [`Refreshed ${timestamp}.`, ...parts].join(" ")
   };
+}
+
+function connectorIsEnabled(status?: ConnectorStatus) {
+  return status?.enabled !== false;
+}
+
+function sourceDisplayName(source: MeetingSource) {
+  return source === "granola" ? "Granola" : "Fathom";
 }
 
 function meetingMatchesQuery(meeting: MeetingNote, query: string) {

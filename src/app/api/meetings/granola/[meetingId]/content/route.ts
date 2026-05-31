@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { authenticated } from "@/lib/auth";
+import { connectorEnabled } from "@/lib/connectors";
 import { fetchGranolaMeetingDetail, resolveGranolaSourceUrl } from "@/lib/granola-mcp";
 import { GRANOLA_TOKEN_COOKIE, granolaCookieOptions, readGranolaTokens, refreshGranolaTokens, sealGranolaValue } from "@/lib/granola-oauth";
 import type { MeetingNote } from "@/lib/types";
@@ -13,6 +14,10 @@ export async function GET(
 ) {
   if (!(await authenticated())) {
     return NextResponse.json({ error: "Sign in to Echolog Lucid." }, { status: 401 });
+  }
+
+  if (!connectorEnabled("granola")) {
+    return NextResponse.json({ error: "Granola is disabled for this deployment." }, { status: 404 });
   }
 
   let granolaTokens = await readGranolaTokens();

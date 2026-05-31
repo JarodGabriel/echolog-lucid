@@ -66,6 +66,8 @@ Set:
 
 - `APP_SECRET`: long random value used to sign and encrypt cookies. Required in production.
 - `APP_PASSWORD`: private login password for the app. Required in production.
+- `ENABLE_GRANOLA`: set to `false` to hide Granola and skip its server routes.
+- `ENABLE_FATHOM`: set to `false` to hide Fathom and skip its API calls.
 - `FATHOM_API_KEY`: Fathom API key. Leave empty if you only want Granola.
 - `NEXT_PUBLIC_APP_URL`: deployed app URL, used as the stable Granola OAuth redirect base.
 - `MEETING_LOOKBACK_DAYS`: how many recent days to fetch. Defaults to `14`.
@@ -77,6 +79,26 @@ npm run dev
 ```
 
 Open `http://localhost:3000`.
+
+## Connector Modes
+
+Both connectors are enabled by default.
+
+For a Fathom-only deployment:
+
+```env
+ENABLE_GRANOLA="false"
+ENABLE_FATHOM="true"
+```
+
+For a Granola-only deployment:
+
+```env
+ENABLE_GRANOLA="true"
+ENABLE_FATHOM="false"
+```
+
+Disabled connectors are hidden from the app UI and skipped by server routes. This is useful if someone forks or copies the repo and only wants Fathom, or if they already use Granola's first-party iOS app but still want a self-hosted Fathom notes PWA.
 
 ## Deploying to Vercel or Another Host
 

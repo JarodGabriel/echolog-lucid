@@ -1,4 +1,5 @@
 import type { ConnectorStatus, MeetingNote } from "@/lib/types";
+import { connectorEnabled, connectorLabel, disabledConnectorStatus } from "@/lib/connectors";
 import type { GranolaTokens } from "@/lib/granola-oauth";
 
 const GRANOLA_MCP_URL = "https://mcp.granola.ai/mcp";
@@ -34,8 +35,16 @@ export async function fetchGranolaMeetings(tokens: GranolaTokens | null): Promis
   status: ConnectorStatus;
   meetings: MeetingNote[];
 }> {
+  if (!connectorEnabled("granola")) {
+    return {
+      status: disabledConnectorStatus("granola"),
+      meetings: []
+    };
+  }
+
   const baseStatus: ConnectorStatus = {
-    label: "Granola personal account",
+    enabled: true,
+    label: connectorLabel("granola"),
     configured: true,
     connected: Boolean(tokens)
   };
