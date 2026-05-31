@@ -4,7 +4,7 @@
 
 Echolog Lucid is currently designed as a self-hosted personal PWA. Each deployment should be controlled by the person or organization whose meeting notes are being accessed.
 
-It is not yet a multi-tenant SaaS. Do not run one shared public instance for unrelated users unless you first add proper per-user accounts, token storage, database isolation, admin controls, and abuse monitoring.
+It was not made to be a multi-tenant SaaS. Which means you shouldn't run one shared public instance for unrelated users unless you first add proper per-user accounts, token storage, database isolation, admin controls, and abuse monitoring.
 
 ## Secrets
 
