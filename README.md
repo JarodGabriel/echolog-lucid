@@ -130,6 +130,8 @@ Tools such as Lovable, Bolt, Replit-style workspaces, or other app builders can 
 - Production fails closed if `APP_PASSWORD` or `APP_SECRET` is missing.
 - This app stores Granola OAuth tokens in encrypted HTTP-only cookies using `APP_SECRET`.
 
+FYI more helpful security information under the security tab.
+
 ## Checks
 
 ```bash
